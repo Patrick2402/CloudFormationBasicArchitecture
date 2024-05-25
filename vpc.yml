@@ -1,7 +1,7 @@
 Description: This template deploys a VPC, with a pair of public and private
   subnets spread across two Availability Zones. It deploys an internet gateway,
   with a default route on the public subnets. It deploys a pair of NAT gateways
-  (one in each AZ), and default routes for them in the private subnets.
+  (one in each AZ), and default routes for them in the private subnets. With Ec2 and ALB.
 
 Parameters:
   EnvironmentName:
@@ -9,7 +9,7 @@ Parameters:
     Type: String
 
   VpcCIDR:
-    Description: Please enter the IP range (CIDR notation) for this VPC
+    Description: Please enter the IP range (CIDR notation ) for this VPC
     Type: String
     Default: 10.100.0.0/16
 
