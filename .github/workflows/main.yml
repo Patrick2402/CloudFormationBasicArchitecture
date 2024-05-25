@@ -1,12 +1,13 @@
 name: 'Deploy CloudFormation template to AWS'
-on: 
-  push:
-    branches: [ master ]
+on:
   pull_request:
-    branches: [ master ]
+    branches:
+      - main
+    types: [closed]
 
 jobs:
   deploy:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code from master branch
