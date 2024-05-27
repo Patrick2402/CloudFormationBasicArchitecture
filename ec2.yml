@@ -22,7 +22,7 @@ InstanceSecurityGroup:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
 
-  MyEC2Instance:
+MyEC2Instance:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: ami-08db961cf62f02dc4
