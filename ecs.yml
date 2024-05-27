@@ -1,0 +1,93 @@
+
+Parameters:
+  ImageECS:
+    Description: Image form ECR repository
+    Type: String
+    Default: 285958950012.dkr.ecr.eu-central-1.amazonaws.com/website:latest
+Resources:
+  ECSTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+          - Name: nginx
+            Image: !Ref ImageECS
+            Cpu: 512
+            PortMappings:
+              - ContainerPort: 80
+                HostPort: 80
+                Protocol: tcp
+            Essential: true
+      Cpu: 512
+      ExecutionRoleArn: !GetAtt  ECSIamRole.Arn
+      Family: mycloudformationfamily
+      Memory: 1024
+      NetworkMode: awsvpc
+      PidMode: task
+      RequiresCompatibilities: 
+        - FARGATE
+      RuntimePlatform: 
+        CpuArchitecture: ARM64
+        OperatingSystemFamily: LINUX
+      Tags:
+        - Key: Environment
+          Value: websitenginx
+      TaskRoleArn: !GetAtt ECSIamRole.Arn
+  
+  ECSIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: 
+          - Effect: "Allow"
+            Principal: 
+              Service: 
+                - "ecs-tasks.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Description: IAM Role for ECS
+      Path: "/"
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      RoleName: RoleForECS
+
+
+#############
+# CLUSTER ###
+##############
+
+  ECSCluster:
+      Type: AWS::ECS::Cluster
+      Properties:
+        ClusterName: MyFargateCluster
+        CapacityProviders:
+          - FARGATE
+        DefaultCapacityProviderStrategy:
+          - CapacityProvider: FARGATE
+            Weight: 1
+        Configuration:
+          ExecuteCommandConfiguration:
+            Logging: DEFAULT
+
+
+#############
+# SERVICE ###
+#############
+
+  ECSService:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      ServiceName: nginx-service
+      Cluster: !Ref ECSCluster
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - !ImportValue InstanceSecurityGroup
+          Subnets:
+            - !ImportValue PublicSubnet1 # Should be changed to private subnets and Load balancer but not today 
+            - !ImportValue PublicSubnet2
+      TaskDefinition: !Ref ECSTaskDefinition

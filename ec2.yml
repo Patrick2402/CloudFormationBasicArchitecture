@@ -110,3 +110,10 @@ Resources:
       Roles: 
         - 
           Ref: IAMEc2Role
+
+Outputs:
+  SecurityGroupEc2:
+    Description: Security Group EC2
+    Value: !Ref InstanceSecurityGroup
+    Export: 
+      Name: InstanceSecurityGroup
