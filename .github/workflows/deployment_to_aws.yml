@@ -1,0 +1,57 @@
+name: 'Deploy CloudFormation template to AWS'
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+  workflow_dispatch:
+  
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        template: [vpc.yml, ec2.yml, ecs.yml]
+    steps:
+      - name: Checkout code from master branch
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.ACCESS_KEY_SECRET }}
+          aws-region: eu-central-1
+
+      - name: Deploy to AWS CloudFormation VPC
+        id: deploy_vpc
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: CloudFormationArchitecture
+          # template: vpc.yml 
+          template: ${{ matrix.template }} # not good bc i didnt check that vpc created successfuly :) 
+          no-fail-on-empty-changeset: "1"
+          parameter-overrides: "EnvironmentName=CFArchitecture"
+
+      # - name: Deploy to AWS CloudFormation EC2
+      #   id: deploy_ec2
+      #   if: steps.deploy_vpc.outputs.stack-status == 'CREATE_COMPLETE' || steps.deploy_vpc.outputs.stack-status == 'UPDATE_COMPLETE'
+      #   uses: aws-actions/aws-cloudformation-github-deploy@v1
+      #   with:
+      #     name: CloudFormationArchitecture
+      #     template: ec2.yml
+      #     no-fail-on-empty-changeset: "1"
+      #     parameter-overrides: "EnvironmentName=CFArchitecture"
+
+      # - name: Deploy to AWS CloudFormation ECS
+      #   id: deploy_ecs
+      #   if: steps.deploy_vpc.outputs.stack-status == 'CREATE_COMPLETE' || steps.deploy_vpc.outputs.stack-status == 'UPDATE_COMPLETE'
+      #   uses: aws-actions/aws-cloudformation-github-deploy@v1
+      #   with:
+      #     name: CloudFormationArchitecture
+      #     template: ecs.yml
+      #     no-fail-on-empty-changeset: "1"
+      #     parameter-overrides: "EnvironmentName=CFArchitecture"
+
+      
