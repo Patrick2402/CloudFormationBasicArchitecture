@@ -28,7 +28,7 @@ jobs:
         id: deploy_vpc
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: CloudFormationArchitecture
+          name: CloudFormationArchitecture-${{matrix.template}}
           # template: vpc.yml 
           template: ${{ matrix.template }} # not good bc i didnt check that vpc created successfuly :) 
           no-fail-on-empty-changeset: "1"
