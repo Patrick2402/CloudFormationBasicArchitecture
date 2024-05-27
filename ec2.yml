@@ -3,7 +3,7 @@ InstanceSecurityGroup:
     Properties:
       GroupName: Octopus Target Group
       GroupDescription: Test Security Group
-      VpcId: !ImportValue VPC_ID
+      VpcId: !ImportValue VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: '80'
